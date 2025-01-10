@@ -23,6 +23,7 @@ export const Login = () => {
   
   // handles user redirection
   useEffect(()=>{
+    alert(loggedInUser)
     if(loggedInUser && loggedInUser?.isVerified){
       navigate("/")
     }
