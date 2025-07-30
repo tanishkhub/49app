@@ -1,103 +1,221 @@
-import { FormHelperText, Paper, Stack, Typography, useMediaQuery, useTheme} from '@mui/material'
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Paper, Stack, Typography, useTheme, Tooltip } from '@mui/material';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Favorite from '@mui/icons-material/Favorite';
 import Checkbox from '@mui/material/Checkbox';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectWishlistItems } from '../../wishlist/WishlistSlice';
 import { selectLoggedInUser } from '../../auth/AuthSlice';
-import { addToCartAsync,selectCartItems } from '../../cart/CartSlice';
-import {motion} from 'framer-motion'
+import { addToCartAsync, selectCartItems } from '../../cart/CartSlice';
+import { motion } from 'framer-motion';
+import logo from '../../../assets/images/logo.svg'; // Import your logo.svg
 
-export const ProductCard = ({id,title,price,thumbnail,brand,stockQuantity,handleAddRemoveFromWishlist,isWishlistCard,isAdminCard}) => {
+export const ProductCard = ({ 
+  id, 
+  title, 
+  price, 
+  thumbnail, 
+  brand, 
+  stockQuantity, 
+  handleAddRemoveFromWishlist, 
+  isWishlistCard, 
+  isAdminCard 
+}) => {
+  const navigate = useNavigate();
+  const wishlistItems = useSelector(selectWishlistItems);
+  const loggedInUser = useSelector(selectLoggedInUser);
+  const cartItems = useSelector(selectCartItems);
+  const dispatch = useDispatch();
+  const theme = useTheme();
 
+  const isProductAlreadyInWishlist = wishlistItems.some(item => item.product._id === id);
+  const isProductAlreadyInCart = cartItems.some(item => item.product._id === id);
 
-    const navigate=useNavigate()
-    const wishlistItems=useSelector(selectWishlistItems)
-    const loggedInUser=useSelector(selectLoggedInUser)
-    const cartItems=useSelector(selectCartItems)
-    const dispatch=useDispatch()
-    let isProductAlreadyinWishlist=-1
-
-
-    const theme=useTheme()
-    const is1410=useMediaQuery(theme.breakpoints.down(1410))
-    const is932=useMediaQuery(theme.breakpoints.down(932))
-    const is752=useMediaQuery(theme.breakpoints.down(752))
-    const is500=useMediaQuery(theme.breakpoints.down(500))
-    const is608=useMediaQuery(theme.breakpoints.down(608))
-    const is488=useMediaQuery(theme.breakpoints.down(488))
-    const is408=useMediaQuery(theme.breakpoints.down(408))
-
-    isProductAlreadyinWishlist=wishlistItems.some((item)=>item.product._id===id)
-
-    const isProductAlreadyInCart=cartItems.some((item)=>item.product._id===id)
-
-    const handleAddToCart=async(e)=>{
-        e.stopPropagation()
-        const data={user:loggedInUser?._id,product:id}
-        dispatch(addToCartAsync(data))
-    }
-
+  const handleAddToCart = async (e) => {
+    e.stopPropagation();
+    const data = { user: loggedInUser?._id, product: id };
+    dispatch(addToCartAsync(data));
+  };
 
   return (
-    <>
-
-    {
-
-    isProductAlreadyinWishlist!==-1 ?
-    <Stack component={isAdminCard?"":isWishlistCard?"":is408?'':Paper} mt={is408?2:0} elevation={1} p={2} width={is408?'auto':is488?"200px":is608?"240px":is752?"300px":is932?'240px':is1410?'300px':'340px'} sx={{cursor:"pointer"}} onClick={()=>navigate(`/product-details/${id}`)}>
-
-        {/* image display */}
-        <Stack>
-            <img width={'100%'} style={{aspectRatio:1/1,objectFit:"contain"}} height={'100%'}  src={thumbnail} alt={`${title} photo unavailable`} />
+    <motion.div
+      whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
+      whileTap={{ scale: 0.97 }}
+    >
+      <Paper
+        elevation={6}
+        sx={{
+          width: 300,
+          height: 450,
+          borderRadius: '20px',
+          overflow: 'hidden',
+          position: 'relative',
+          cursor: 'pointer',
+          background: 'linear-gradient(135deg, #ffffff, #f2f2f2)',
+          boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+        onClick={() => navigate(`/product-details/${id}`)}
+      >
+        {/* Top Right: Wishlist Icon */}
+        <Stack
+          sx={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            zIndex: 2,
+          }}
+        >
+          {!isAdminCard && (
+            <Tooltip title={isProductAlreadyInWishlist ? "Remove from Wishlist" : "Add to Wishlist"} arrow>
+              <motion.div whileHover={{ scale: 1.3 }} whileTap={{ scale: 1 }}>
+                <Checkbox
+                  onClick={(e) => e.stopPropagation()}
+                  checked={isProductAlreadyInWishlist}
+                  onChange={(e) => handleAddRemoveFromWishlist(e, id)}
+                  icon={<FavoriteBorder sx={{ fontSize: '1.8rem', color: '#888' }} />}
+                  checkedIcon={<Favorite sx={{ color: '#e91e63', fontSize: '1.8rem' }} />}
+                />
+              </motion.div>
+            </Tooltip>
+          )}
         </Stack>
 
-        {/* lower section */}
-        <Stack flex={2} justifyContent={'flex-end'} spacing={1} rowGap={2}>
+        {/* Image Section */}
+        <Stack
+          sx={{
+            flex: 1,
+            position: 'relative',
+            backgroundColor: '#fafafa',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <motion.img
+            src={thumbnail}
+            alt={title}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              objectFit: 'contain',
+              borderRadius: '12px',
+            }}
+          />
+          {/* Subtle Overlay Effect on Hover */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileHover={{ opacity: 0.15 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: '#000',
+              borderRadius: '12px',
+            }}
+          />
+        </Stack>
 
-            <Stack>
-                <Stack flexDirection={'row'} alignItems={'center'} justifyContent={'space-between'}>
-                    <Typography variant='h6' fontWeight={400}>{title}</Typography>
-                    {
-                    !isAdminCard && 
-                    <motion.div whileHover={{scale:1.3,y:-10,zIndex:100}} whileTap={{scale:1}} transition={{duration:.4,type:"spring"}}>
-                        <Checkbox onClick={(e)=>e.stopPropagation()} checked={isProductAlreadyinWishlist} onChange={(e)=>handleAddRemoveFromWishlist(e,id)} icon={<FavoriteBorder />} checkedIcon={<Favorite sx={{color:'red'}} />} />
-                    </motion.div>
-                    }
-                </Stack>
-                <Typography color={"text.secondary"}>{brand}</Typography>
-            </Stack>
+        {/* Info & Action Section */}
+        <Stack
+          sx={{
+            p: 2,
+            background: 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(10px)',
+            flexShrink: 0,
+          }}
+          spacing={1}
+        >
+          {/* Title & Brand */}
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              color: theme.palette.text.primary,
+            }}
+          >
+            {title}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              color: theme.palette.text.secondary,
+            }}
+          >
+            {brand}
+          </Typography>
 
-            <Stack sx={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
-                <Typography>${price}</Typography>
-                {
-                    !isWishlistCard? isProductAlreadyInCart?
-                    'Added to cart'
-                    :
-                    !isAdminCard &&
-                    <motion.button  whileHover={{scale:1.030}} whileTap={{scale:1}} onClick={(e)=>handleAddToCart(e)} style={{padding:"10px 15px",borderRadius:"3px",outline:"none",border:"none",cursor:"pointer",backgroundColor:"black",color:"white",fontSize:is408?'.9rem':is488?'.7rem':is500?'.8rem':'.9rem'}}>
-                        <div style={{display:"flex",alignItems:"center",columnGap:".5rem"}}>
-                            <p>Add To Cart</p>
-                        </div>
-                    </motion.button>
-                    :''
-                }
-                
-            </Stack>
-            {
-                stockQuantity<=20 && (
-                    <FormHelperText sx={{fontSize:".9rem"}} error>{stockQuantity===1?"Only 1 stock is left":"Only few are left"}</FormHelperText>
+          {/* Price with Logo */}
+          <Typography
+            variant="h6"
+            fontWeight={600}
+            color={theme.palette.primary.main}
+            sx={{ display: 'flex', alignItems: 'center' }}
+          >
+            <img 
+  src={logo} 
+  alt="Rupee" 
+  style={{ width: '2.5em', height: '2em', marginRight: '0.3em', verticalAlign: 'middle', transform: 'scaleX(2)' }} 
+/>{price}
+          </Typography>
+
+          {/* Action Buttons */}
+          <Stack spacing={1} mt={1}>
+            {isWishlistCard ? null : (
+              isProductAlreadyInCart ? (
+                <Typography variant="body2" color="success.main" align="center">
+                  Added to Cart
+                </Typography>
+              ) : (
+                !isAdminCard && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => handleAddToCart(e)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 0',
+                      borderRadius: '30px',
+                      border: 'none',
+                      outline: 'none',
+                      background: 'linear-gradient(90deg, #e91e63, #ff4081)',
+                      color: '#fff',
+                      fontWeight: '700',
+                      fontSize: '1rem',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    Add to Cart
+                  </motion.button>
                 )
-            }
+              )
+            )}
+
+            {/* Stock Alert */}
+            {stockQuantity <= 20 && (
+              <Typography variant="caption" color="error" align="center">
+                {stockQuantity === 1 ? "Only 1 left in stock!" : "Limited stock available!"}
+              </Typography>
+            )}
+          </Stack>
         </Stack>
-    </Stack> 
-    :''
-    
-    
-    }
-    
-    </>
-  )
-}
+      </Paper>
+    </motion.div>
+  );
+};

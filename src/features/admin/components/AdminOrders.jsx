@@ -1,204 +1,443 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { getAllOrdersAsync, resetOrderUpdateStatus, selectOrderUpdateStatus, selectOrders, updateOrderByIdAsync } from '../../order/OrderSlice'
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { Avatar, Button, Chip, FormControl, IconButton, InputLabel, MenuItem, Select, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import { useForm } from "react-hook-form"
-import { toast } from 'react-toastify';
-import {noOrdersAnimation} from '../../../assets/index'
-import Lottie from 'lottie-react'
-
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getAllOrdersAsync,
+  updateOrderByIdAsync,
+  resetOrderUpdateStatus,
+  selectOrders,
+  selectCount,
+  selectOrderUpdateStatus,
+} from "../../order/OrderSlice";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Avatar,
+  Button,
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+  Collapse,
+  TablePagination,
+  Box,
+} from "@mui/material";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 export const AdminOrders = () => {
+  const dispatch = useDispatch();
+  const orders = useSelector(selectOrders);
+  console.log(orders)
+  const count = useSelector(selectCount);
+  console.log(count)
+  const orderUpdateStatus = useSelector(selectOrderUpdateStatus);
+  const [searchId, setSearchId] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [copiedId, setCopiedId] = useState(null);
+  
+  const [selectedColumns, setSelectedColumns] = useState([
+    "Id",
+    "Item",
+    "Total Amount",
+    "Status",
+    "Actions",
+  ]);
+  const [editOrderId, setEditOrderId] = useState(null);
+  const [expandedOrder, setExpandedOrder] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  
+  const { register, handleSubmit, setValue } = useForm();
 
-  const dispatch=useDispatch()
-  const orders=useSelector(selectOrders)
-  const [editIndex,setEditIndex]=useState(-1)
-  const orderUpdateStatus=useSelector(selectOrderUpdateStatus)
-  const theme=useTheme()
-  const is1620=useMediaQuery(theme.breakpoints.down(1620))
-  const is1200=useMediaQuery(theme.breakpoints.down(1200))
-  const is820=useMediaQuery(theme.breakpoints.down(820))
-  const is480=useMediaQuery(theme.breakpoints.down(480))
+  useEffect(() => {
+    dispatch(getAllOrdersAsync({page, rowsPerPage, searchId,filterStatus,sortOrder}));
+  }, [dispatch,page,rowsPerPage,searchId,filterStatus,sortOrder]);
+// alert(searchId)
+  useEffect(() => {
+    if (orderUpdateStatus === "fulfilled") toast.success("Status updated");
+    else if (orderUpdateStatus === "rejected")
+      toast.error("Error updating order status");
+    dispatch(resetOrderUpdateStatus());
+  }, [orderUpdateStatus, dispatch]);
 
-  const {register,handleSubmit,formState: { errors },} = useForm()
+  const handleUpdateOrder = (data) => {
+    dispatch(updateOrderByIdAsync({ ...data, _id: editOrderId }));
+    setEditOrderId(null);
+  };
 
-  useEffect(()=>{
-    dispatch(getAllOrdersAsync())
-  },[dispatch])
+  const handleColumnChange = (event) => {
+    setSelectedColumns(event.target.value);
+  };
 
-
-  useEffect(()=>{
-    if(orderUpdateStatus==='fulfilled'){
-      toast.success("Status udpated")
-    }
-    else if(orderUpdateStatus==='rejected'){
-      toast.error("Error updating order status")
-    }
-  },[orderUpdateStatus])
-
-  useEffect(()=>{
-    return ()=>{
-      dispatch(resetOrderUpdateStatus())
-    }
-  },[])
-
-
-  const handleUpdateOrder=(data)=>{
-    const update={...data,_id:orders[editIndex]._id}
-    setEditIndex(-1)
-    dispatch(updateOrderByIdAsync(update))
-  }
-
-
-  const editOptions=['Pending','Dispatched','Out for delivery','Delivered','Cancelled']
-
-  const getStatusColor=(status)=>{
-    if(status==='Pending'){
-      return {bgcolor:'#dfc9f7',color:'#7c59a4'}
-    }
-    else if(status==='Dispatched'){
-      return {bgcolor:'#feed80',color:'#927b1e'}
-    }
-    else if(status==='Out for delivery'){
-      return {bgcolor:'#AACCFF',color:'#4793AA'}
-    }
-    else if(status==='Delivered'){
-      return {bgcolor:"#b3f5ca",color:"#548c6a"}
-    }
-    else if(status==='Cancelled'){
-      return {bgcolor:"#fac0c0",color:'#cc6d72'}
-    }
-  }
-
+  // const filteredOrders = orders
+  //   .filter(
+  //     (order) =>
+  //       (!searchId || order._id.includes(searchId)) &&
+  //       (!filterStatus || order.status === filterStatus)
+  //   )
+  //   .sort((a, b) =>
+  //     sortOrder === "asc"
+  //       ? new Date(a.createdAt) - new Date(b.createdAt)
+  //       : new Date(b.createdAt) - new Date(a.createdAt)
+  //   )
+  //   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
+    <Stack spacing={3} p={3} bgcolor="background.default" borderRadius="16px">
+      {/* 🔹 Search & Filters */}
+      <Stack direction="row" spacing={2}>
+        <TextField
+          label="Search Order ID"
+          variant="outlined"
+          fullWidth
+          value={searchId}
+          onChange={(e) => setSearchId(e.target.value)}
+          sx={{ bgcolor: "background.paper", borderRadius: 1 }}
+        />
+        <FormControl fullWidth>
+          <InputLabel>Filter by Status</InputLabel>
+          <Select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            sx={{ bgcolor: "background.paper", borderRadius: 1 }}
+          >
+            <MenuItem value="">All</MenuItem>
+            {[
+              "Pending",
+              "Dispatched",
+              "Out for delivery",
+              "Delivered",
+              "Cancelled",
+            ].map((status) => (
+              <MenuItem key={status} value={status}>
+                {status}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl fullWidth>
+          <InputLabel>Sort by Date</InputLabel>
+          <Select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            sx={{ bgcolor: "background.paper", borderRadius: 1 }}
+          >
+            <MenuItem value="asc">Oldest First</MenuItem>
+            <MenuItem value="desc">Newest First</MenuItem>
+          </Select>
+        </FormControl>
+      </Stack>
 
-    <Stack justifyContent={'center'} alignItems={'center'}>
+      {/* 🔹 Column Selection */}
+      <FormControl fullWidth>
+        <InputLabel>Select Columns</InputLabel>
+        <Select
+          multiple
+          value={selectedColumns}
+          onChange={handleColumnChange}
+          renderValue={(selected) => selected.join(", ")}
+          sx={{ bgcolor: "background.paper", borderRadius: 1 }}
+        >
+          {["Id", "Items", "Total Amount", "Status", "Actions"].map((col) => (
+            <MenuItem key={col} value={col}>
+              {col}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
-      <Stack mt={5} mb={3} component={'form'} noValidate onSubmit={handleSubmit(handleUpdateOrder)}>
-
-        {
-          orders.length?
-          <TableContainer sx={{width:is1620?"95vw":"auto",overflowX:'auto'}} component={Paper} elevation={2}>
-            <Table aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Order</TableCell>
-                  <TableCell align="left">Id</TableCell>
-                  <TableCell align="left">Item</TableCell>
-                  <TableCell align="right">Total Amount</TableCell>
-                  <TableCell align="right">Shipping Address</TableCell>
-                  <TableCell align="right">Payment Method</TableCell>
-                  <TableCell align="right">Order Date</TableCell>
-                  <TableCell align="right">Status</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-
-                {
-                orders.length && orders.map((order,index) => (
-
-                  <TableRow key={order._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-
-                    <TableCell component="th" scope="row">{index}</TableCell>
-                    <TableCell align="right">{order._id}</TableCell>
-                    <TableCell align="right">
-                      {
-                        order.item.map((product)=>(
-                          <Stack mt={2} flexDirection={'row'} alignItems={'center'} columnGap={2}>
-                            <Avatar src={product.product.thumbnail}></Avatar>
-                            <Typography>{product.product.title}</Typography>
-                          </Stack>
-                        ))
-                      }
-                    </TableCell>
-                    <TableCell align="right">{order.total}</TableCell>
-                    <TableCell align="right">
-                      <Stack>
-                        <Typography>{order.address[0].street}</Typography>
-                        <Typography>{order.address[0].city}</Typography>
-                        <Typography>{order.address[0].state}</Typography>
-                        <Typography>{order.address[0].postalCode}</Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell align="right">{order.paymentMode}</TableCell>
-                    <TableCell align="right">{new Date(order.createdAt).toDateString()}</TableCell>
-
-                    {/* order status */}
-                    <TableCell align="right">
-
-                        {
-                          editIndex===index?(
-
-                        <FormControl fullWidth>
-                          <InputLabel id="demo-simple-select-label">Update status</InputLabel>
-                          <Select
-                            defaultValue={order.status}
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            label="Update status"
-                            {...register('status',{required:'Status is required'})}
-                            >
-                            
-                            {
-                              editOptions.map((option)=>(
-                                <MenuItem value={option}>{option}</MenuItem>
-                              ))
-                            }
-                          </Select>
-                        </FormControl>
-                        ):<Chip label={order.status} sx={getStatusColor(order.status)}/>
-                        }
-                      
-                    </TableCell>
-
-                    {/* actions */}
-                    <TableCell align="right">
-
-                      {
-                        editIndex===index?(
-                          <Button>
-
-                            <IconButton type='submit'><CheckCircleOutlinedIcon/></IconButton>
-                          </Button>
-                        )
-                        :
-                        <IconButton onClick={()=>setEditIndex(index)}><EditOutlinedIcon/></IconButton>
-                      }
-
-                    </TableCell>
-
-                  </TableRow>
-                ))}
-
-              </TableBody>
-            </Table>
-          </TableContainer>
-          :
-          <Stack width={is480?"auto":'30rem'} justifyContent={'center'}>
-
-            <Stack rowGap={'1rem'}>
-                <Lottie animationData={noOrdersAnimation}/>
-                <Typography textAlign={'center'} alignSelf={'center'} variant='h6' fontWeight={400}>There are no orders currently</Typography>
-            </Stack>
+      {/* 🔹 Orders Table */}
+      <TableContainer component={Paper} elevation={3}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ bgcolor: "grey.200" }}>
+              {selectedColumns.map((col) => (
+                <TableCell
+                key={col}
+                sx={{
+                  fontWeight: "bold",
+                  textAlign: col === 'Total Amount' ? 'right' : 'center',
+                  padding: '10px 12px', // subtle padding
+                  color: '#333', // dark text for good contrast
+                  borderBottom: '2px solid #e0e0e0', // thin border for separation
+                  backgroundColor: col === 'Total Amount' ? '#f9f9f9' :'#f9f9f9' , // highlight background for 'Total Amount'
+                  transition: 'background-color 0.2s ease', // smooth background transition on hover
+                  '&:hover': {
+                    backgroundColor: '#f1f1f1', // light background change on hover
+                  }
+                }}
+              >
+                {col}
+              </TableCell>
               
+              ))}
+              <TableCell />
+            </TableRow> 
+          </TableHead>
+          <TableBody>
+            {orders?.map((order) => (
+              <React.Fragment key={order._id}>
+                <TableRow
+                  sx={{
+                    "&:hover": {
+                      bgcolor: "grey.100",
+                      transition: "0.3s",
+                    },
+                  }}
+                >
+                  {/* 🔹 ID Cell with Tooltip */}
+                  {selectedColumns.includes("Id") && (
+                    <Tooltip title="Copy Order ID">
+                      <TableCell
+                        sx={{
+                          cursor: "pointer",
+                          color: copiedId === order._id ? "green" : "inherit",
+                        }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(order._id);
+                          setCopiedId(order._id);
+                          setTimeout(() => setCopiedId(null), 2000);
+                        }}
+                      >
+                        {order._id}
+                      </TableCell>
+                    </Tooltip>
+                  )}
 
-          </Stack>  
+                  {/* 🔹 Item Cell */}
+                  {selectedColumns.includes("Item") && (
+  <TableCell>
+    <Box
+      sx={{
+        maxHeight: 200,        // Adjust the height to your preference
+        overflowY: 'auto',     // Enable vertical scrolling
+        padding: 1,
+        borderRadius: 2,
+        bgcolor: "background.paper",
+        boxShadow: 1,
+      }}
+    >
+      {order.item.map((product) => (
+        <Stack
+          key={product.product._id}
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          sx={{
+            padding: 1,
+            marginBottom: 1,      // Space between each item
+            borderRadius: 2,
+            bgcolor: "background.paper",
+            boxShadow: 1,
+          }}
+        >
+          <Avatar
+            src={product.product.thumbnail}
+            sx={{ width: 48, height: 48 }}
+          />
+          <Box>
+            <Typography variant="subtitle1" fontWeight="bold">
+              {product.product.title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Quantity: {product.quantity}
+            </Typography>
+          </Box>
+        </Stack>
+      ))}
+    </Box>
+  </TableCell>
+)}
+
+
+                  {/* 🔹 Total Amount */}
+                  {selectedColumns.includes("Total Amount") && (
+  <TableCell
+    sx={{
+      color: order.paymentStatus === "Success" ? "green" : "red",
+      fontWeight: "bold",
+      textAlign: "right", // To make it right aligned
+    }}
+  >
+    ₹{parseFloat(order.total).toFixed(2)}
+  </TableCell>
+)}
+
+
+                  {/* 🔹 Status */}
+                  {selectedColumns.includes("Status") && (
+                    <TableCell>
+                      <Chip
+                        label={order.status}
+                        sx={{
+                          bgcolor:
+                            order.status === "Delivered"
+                              ? "success.light"
+                              : "warning.light",
+                        }}
+                      />
+                    </TableCell>
+                  )}
+
+                  {/* 🔹 Actions */}
+                  {selectedColumns.includes("Actions") && (
+                    <TableCell>
+                      {editOrderId === order._id ? (
+                        <form onSubmit={handleSubmit(handleUpdateOrder)}>
+                          <Select
+                            {...register("status")}
+                            defaultValue={order.status}
+                            sx={{ fontSize: "small" }}
+                          >
+                            {[
+                              "Pending",
+                              "Dispatched",
+                              "Out for delivery",
+                              "Delivered",
+                              "Cancelled",
+                            ].map((status) => (
+                              <MenuItem key={status} value={status}>
+                                {status}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          <IconButton type="submit">
+                            <CheckCircleOutlinedIcon color="success" />
+                          </IconButton>
+                        </form>
+                      ) : (
+                        <Tooltip title="Edit Status">
+                          <IconButton
+                            onClick={() => {
+                              setEditOrderId(order._id);
+                              setValue("status", order.status);
+                            }}
+                          >
+                            <EditOutlinedIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  )}
+
+                  {/* 🔹 Expandable Row */}
+                  <TableCell>
+                    <IconButton
+                      onClick={() =>
+                        setExpandedOrder(
+                          expandedOrder === order._id ? null : order._id
+                        )
+                      }
+                    >
+                      {expandedOrder === order._id ? (
+                        <ExpandLessIcon />
+                      ) : (
+                        <ExpandMoreIcon />
+                      )}
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+
+                {/* 🔹 Expanded Row */}
+                {expandedOrder === order._id && (
+                  <TableRow>
+                    <TableCell colSpan={selectedColumns.length + 1}>
+                      <Collapse in={true}>
+                        <Stack
+                          p={2}
+                          spacing={2}
+                          sx={{
+                            borderRadius: 2,
+                            bgcolor: "grey.50",
+                            boxShadow: 1,
+                          }}
+                        >
+                          <Typography>
+                            <b>Shipping Address:</b> {order.address[0].street},{" "}
+                            {order.address[0].city}, {order.address[0].state}
+                          </Typography>
+                          <Typography>
+                            <b>Phone:</b> {order.address[0].phoneNumber}
+                          </Typography>
+                          <Typography>
+  <b>Order Date:</b> {new Date(order.createdAt).toLocaleDateString('en-US', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })}
+</Typography>
+
+                          <Typography>
+                            <b>Payment Status:</b>{" "}
+                            {order.paymentStatus || "N/A"}
+                          </Typography>
+                          <Typography>
+            <b>Payment Id:</b>{" "}
+            <Tooltip title="Click to Copy Payment ID">
+              <Box
+                component="span"
+                sx={{
+                  cursor: "pointer",
+                  color: copiedId === order.paymentDetails[0]?.razorpay_payment_id ? "green" : "inherit",
+                  
+                }}
+                onClick={() => {
+                  if (order.paymentDetails[0]?.razorpay_payment_id) {
+                    navigator.clipboard.writeText(
+                      order.paymentDetails[0]?.razorpay_payment_id
+                    );
+                    setCopiedId(order.paymentDetails[0]?.razorpay_payment_id);
+                    setTimeout(() => setCopiedId(null), 2000); // Reset after 2 seconds
+                    toast.success("Payment ID copied to clipboard!");
+                  } else {
+                    toast.error("No Payment ID available to copy!");
+                  }
+                }}
+              >
+                {order.paymentDetails[0]?.razorpay_payment_id || "N/A"}
+              </Box>
+            </Tooltip>
+          </Typography>
+                        </Stack>
+                      </Collapse>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* 🔹 Pagination */}
+      <TablePagination
+        component="div"
+        count={count}
+        page={page}
+        onPageChange={(event, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(event) =>
+          setRowsPerPage(parseInt(event.target.value, 10))
         }
-    
+      />
     </Stack>
-    
-    </Stack>
-  )
-}
+  );
+};

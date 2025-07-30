@@ -57,7 +57,7 @@ export const Footer = () => {
 
                 <Stack rowGap={'1rem'} padding={'1rem'}>
                     <Typography  variant='h6'>Download App</Typography>
-                    <Typography sx={{...labelStyles,color:"graytext",fontWeight:500}}>Save $3 with App New User Only</Typography>
+                    {/* <Typography sx={{...labelStyles,color:"graytext",fontWeight:500}}>Save $3 with App New User Only</Typography> */}
                     <Stack flexDirection={'row'} columnGap={'.5rem'}>
 
                         <Box width={'100px'} height={"100px"}>

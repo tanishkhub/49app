@@ -7,6 +7,7 @@ const initialState={
     orderUpdateStatus:"idle",
     orderFetchStatus:"idle",
     orders:[],
+    count:0,
     currentOrder:null,
     errors:null,
     successMessage:null
@@ -17,8 +18,9 @@ export const createOrderAsync=createAsyncThunk("orders/createOrderAsync",async(o
     return createdOrder
 })
 
-export const getAllOrdersAsync=createAsyncThunk("orders/getAllOrdersAsync",async()=>{
-    const orders=await getAllOrders()
+export const getAllOrdersAsync=createAsyncThunk("orders/getAllOrdersAsync",async({page, rowsPerPage,searchId,filterStatus,sortOrder})=>{
+    
+    const orders=await getAllOrders(page, rowsPerPage,searchId,filterStatus,sortOrder)
     return orders
 })
 
@@ -66,7 +68,9 @@ const orderSlice=createSlice({
             })
             .addCase(getAllOrdersAsync.fulfilled,(state,action)=>{
                 state.orderFetchStatus='fulfilled'
-                state.orders=action.payload
+                state.orders=action.payload.orders
+                // console.log(action.payload.orders)
+                state.count=action.payload.count
             })
             .addCase(getAllOrdersAsync.rejected,(state,action)=>{
                 state.orderFetchStatus='rejected'
@@ -106,6 +110,8 @@ export const {resetCurrentOrder,resetOrderUpdateStatus,resetOrderFetchStatus}=or
 // exporting selectors
 export const selectOrderStatus=(state)=>state.OrderSlice.status
 export const selectOrders=(state)=>state.OrderSlice.orders
+export const selectCount=(state)=>state.OrderSlice.count
+
 export const selectOrdersErrors=(state)=>state.OrderSlice.errors
 export const selectOrdersSuccessMessage=(state)=>state.OrderSlice.successMessage
 export const selectCurrentOrder=(state)=>state.OrderSlice.currentOrder

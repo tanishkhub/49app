@@ -19,10 +19,21 @@ export const getOrderByUserId=async(id)=>{
     }
 }
 
-export const getAllOrders=async()=>{
+// export const getAllOrders=async()=>{
+//     try {
+//         const res=await axiosi.get(`/orders`)
+//         return res.data
+//     } catch (error) {
+//         throw error.response.data
+//     }
+// }
+
+export const getAllOrders=async(page, rowsPerPage,searchId,filterStatus,sortOrder)=>{
     try {
-        const res=await axiosi.get(`/orders`)
-        return res.data
+        const res=await axiosi.get(`/orders?page=` + page + '&limit=' + rowsPerPage + '&searchId=' + searchId +'&filterStatus='+ filterStatus +'&sortOrder='+sortOrder)
+        // alert(res.headers['x-total-count']);
+        const totalOrders=await res.headers.get("x-total-count")
+        return {orders:res.data,count:totalOrders}
     } catch (error) {
         throw error.response.data
     }

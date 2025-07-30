@@ -15,6 +15,7 @@ import linkedinPng from './images/linkedin.png'
 import banner2 from './images/banner2.jpg'
 import banner3 from './images/banner3.jpg'
 import banner4 from './images/banner4.jpg'
+import logosvg from './images/logo.svg'
 import loadingAnimation from './animations/loading.json'
 
 export {
@@ -35,5 +36,6 @@ export {
     banner2,
     banner3,
     banner4,
+    logosvg,
     loadingAnimation
 }
