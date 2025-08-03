@@ -200,20 +200,26 @@ export const ProductList = () => {
             ) : (
                 <>
                     <motion.div
-                        style={{
-                            position: "fixed",
-                            backgroundColor: "white",
-                            height: "100vh",
-                            padding: '1rem',
-                            overflowY: "scroll",
-                            width: is500 ? "100vw" : "30rem",
-                            zIndex: 500
-                        }}
-                        variants={{ show: { left: 0 }, hide: { left: -500 } }}
-                        initial={'hide'}
-                        transition={{ ease: "easeInOut", duration: .7, type: "spring" }}
-                        animate={isProductFilterOpen === true ? "show" : "hide"}
-                    >
+    style={{
+        position: "fixed",
+        top: 0,
+        right: 0,
+        backgroundColor: "white",
+        height: "100vh",
+        padding: '1rem',
+        overflowY: "scroll",
+        width: is500 ? "100vw" : "30rem",
+        zIndex: 500
+    }}
+    variants={{
+        show: { right: 0 },
+        hide: { right: '-100%' }, // or -500 if fixed width
+    }}
+    initial="hide"
+    transition={{ ease: "easeInOut", duration: .7, type: "spring" }}
+    animate={isProductFilterOpen === true ? "show" : "hide"}
+>
+
                         {/* fitlers section */}
                         <Stack
                             mb={'5rem'}
@@ -274,7 +280,7 @@ export const ProductList = () => {
                                         transition: "color 0.3s, font-weight 0.3s"
                                     }}
                                 >
-                                    Totes
+                                    💄 Glow & Go (Beauty Essentials)
                                 </Typography>
 
                                 <Typography
@@ -288,7 +294,7 @@ export const ProductList = () => {
                                         transition: "color 0.3s, font-weight 0.3s"
                                     }}
                                 >
-                                    Backpacks
+                                    💍 Everyday Bling (Accessories)
                                 </Typography>
 
                                 <Typography
@@ -302,7 +308,7 @@ export const ProductList = () => {
                                         transition: "color 0.3s, font-weight 0.3s"
                                     }}
                                 >
-                                    Travel Bags
+                                   🧷 Hair Affair (Hair Accessories)
                                 </Typography>
 
                                 <Typography
@@ -316,7 +322,7 @@ export const ProductList = () => {
                                         transition: "color 0.3s, font-weight 0.3s"
                                     }}
                                 >
-                                    Hip Bags
+                                   🧼 Home Fixers (Daily Tools)
                                 </Typography>
 
                                 <Typography
@@ -330,7 +336,7 @@ export const ProductList = () => {
                                         transition: "color 0.3s, font-weight 0.3s"
                                     }}
                                 >
-                                    Laptop Sleeves
+                                    🎁 Gift it @₹49 (Budget Gifting)
                                 </Typography>
                             </Stack>
 

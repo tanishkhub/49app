@@ -109,11 +109,11 @@ export const AdminDashBoard = () => {
 
 
         <Stack rowGap={2} mt={4} >
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Totes</Typography>
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Backpacks</Typography>
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Travel Bags</Typography>
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Hip Bags</Typography>
-            <Typography sx={{cursor:"pointer"}} variant='body2'>Laptop Sleeves</Typography>
+            <Typography sx={{cursor:"pointer"}} variant='body2'>💄 Glow & Go (Beauty Essentials)</Typography>
+            <Typography sx={{cursor:"pointer"}} variant='body2'>💍 Everyday Bling (Accessories)</Typography>
+            <Typography sx={{cursor:"pointer"}} variant='body2'>🧷 Hair Affair (Hair Accessories)</Typography>
+            <Typography sx={{cursor:"pointer"}} variant='body2'>🧼 Home Fixers (Daily Tools)</Typography>
+            <Typography sx={{cursor:"pointer"}} variant='body2'>🧦 Wear & Carry (Mini Apparel)</Typography>
         </Stack>
 
         {/* brand filters */}
