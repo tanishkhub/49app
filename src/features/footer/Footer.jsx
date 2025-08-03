@@ -1,96 +1,151 @@
-import { Box, IconButton, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { Stack } from '@mui/material'
-import React from 'react'
-import { QRCodePng, appStorePng, googlePlayPng ,facebookPng,instagramPng,twitterPng,linkedinPng} from '../../assets'
-import SendIcon from '@mui/icons-material/Send';
-import { MotionConfig, motion } from 'framer-motion';
+import {
+  Box,
+  Typography,
+  useMediaQuery,
+  useTheme,
+  Stack,
+  Divider,
+  IconButton
+} from '@mui/material';
 import { Link } from 'react-router-dom';
+import { Facebook, Instagram } from '@mui/icons-material';
+import VisitorCounter from './VisitorCounter';
+import { MotionConfig, motion } from 'framer-motion';
 
-
+const linkStyle = {
+  textDecoration: 'none',
+  color: 'inherit'
+};
 
 export const Footer = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const theme=useTheme()
-    const is700=useMediaQuery(theme.breakpoints.down(700))
-
-    const labelStyles={
-        fontWeight:300,
-        cursor:'pointer'
+  const labelStyles = {
+    fontWeight: 300,
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    transition: '0.3s',
+    '&:hover': {
+      color: theme.palette.secondary.main
     }
+  };
+
+  const sectionHeading = {
+    fontWeight: 600,
+    fontSize: '1.1rem',
+    textTransform: 'uppercase',
+    marginBottom: '0.5rem'
+  };
 
   return (
-    <Stack sx={{backgroundColor:theme.palette.primary.main,paddingTop:"3rem",paddingLeft:is700?"1rem":"3rem",paddingRight:is700?"1rem":"3rem",paddingBottom:"1.5rem",rowGap:"5rem",color:theme.palette.primary.light,justifyContent:"space-around"}}>
+    <Box
+      component="footer"
+      sx={{
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
+        padding: '2.5rem 1rem',
+        width: '100%',
+        overflow: 'hidden',
+        maxWidth: '100vw',
+        boxSizing: 'border-box'
+      }}
+    >
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between"
+        alignItems="flex-start"
+        flexWrap="wrap"
+        rowGap="2rem"
+        sx={{ maxWidth: '1200px', margin: '0 auto' }}
+      >
+        {/* Brand / About */}
+        <Stack spacing={1} maxWidth="260px">
+          <Typography variant="h6" sx={sectionHeading}>
+            49Stores
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 300 }}>
+            Affordable daily essentials & trendy picks — all at ₹49.
+          </Typography>
+        </Stack>
 
-            {/* upper */}
-            <Stack flexDirection={'row'} rowGap={'1rem'} justifyContent={is700?"":'space-around'} flexWrap={'wrap'}>
+        {/* Support */}
+        <Stack spacing={0.7}>
+          <Typography sx={sectionHeading}>Support</Typography>
+          <Typography sx={labelStyles}>102, Blue Heavens, Plot No 57, Sec 21,</Typography>
+          <Typography sx={labelStyles}>Ulwe, Maharashtra 410206</Typography>
+          
+          <Typography sx={labelStyles}>mail.49stores@gmail.com</Typography>
+          <Typography sx={labelStyles}>+91 99208 74166</Typography>
+        </Stack>
 
-                <Stack rowGap={'1rem'} padding={'1rem'}>
-                    <Typography variant='h6' fontSize={'1.5rem'}>Exclusive</Typography>
-                    <Typography variant='h6'>Subscribe</Typography>
-                    <Typography sx={labelStyles}>Get 10% off your first order</Typography>
-                    <TextField placeholder='Enter your email' sx={{border:'1px solid white',borderRadius:"6px"}} InputProps={{endAdornment:<IconButton><SendIcon sx={{color:theme.palette.primary.light}}/></IconButton>,style:{color:"whitesmoke"}}}/>
-                </Stack>
+        {/* Account */}
+        <Stack spacing={0.7}>
+          <Typography sx={sectionHeading}>Account</Typography>
+          <Link to="/profile" style={linkStyle}><Typography sx={labelStyles}>My Account</Typography></Link>
+          <Link to="/login" style={linkStyle}><Typography sx={labelStyles}>Login / Register</Typography></Link>
+          <Link to="/cart" style={linkStyle}><Typography sx={labelStyles}>Cart</Typography></Link>
+          <Link to="/wishlist" style={linkStyle}><Typography sx={labelStyles}>Wishlist</Typography></Link>
+          <Link to="/" style={linkStyle}><Typography sx={labelStyles}>Shop</Typography></Link>
+        {/* WhatsApp Career Link */}
+  <a
+    href="https://wa.me/919920874166?text=Hi%2C%20I%20am%20interested%20to%20work%20at%2049stores"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={linkStyle}
+  >
+    <Typography sx={labelStyles}>Careers</Typography>
+  </a>
+</Stack>
 
-                <Stack rowGap={'1rem'} padding={'1rem'}>
-                    <Typography variant='h6'>Support</Typography>
-                    <Typography sx={labelStyles}>11th Main Street, Dhaka,  DH 1515, California.</Typography>
-                    <Typography sx={labelStyles}>exclusive@gmail.com</Typography>
-                    <Typography sx={labelStyles}>+88015-88888-9999</Typography>
-                </Stack>
+        {/* Social & Visitors */}
+        <Stack spacing={1} alignItems={isMobile ? 'flex-start' : 'center'}>
+          <Typography sx={sectionHeading}>Connect</Typography>
+          <Stack direction="row" spacing={1}>
+            <MotionConfig transition={{ type: "spring", stiffness: 300 }}>
+              <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.95 }}>
+                <IconButton
+                  component="a"
+                  href="https://www.facebook.com/profile.php?id=61578414568298"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ color: theme.palette.primary.contrastText }}
+                >
+                  <Facebook />
+                </IconButton>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.95 }}>
+                <IconButton
+                  component="a"
+                  href="https://www.instagram.com/49storesindia/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{ color: theme.palette.primary.contrastText }}
+                >
+                  <Instagram />
+                </IconButton>
+              </motion.div>
+            </MotionConfig>
+          </Stack>
+          <VisitorCounter />
+        </Stack>
+      </Stack>
 
-                <Stack rowGap={'1rem'} padding={'1rem'}>
-                    <Typography  variant='h6'>Account</Typography>
-                    <Typography sx={labelStyles}>My Account</Typography>
-                    <Typography sx={labelStyles}>Login / Register</Typography>
-                    <Typography sx={labelStyles}>Cart</Typography>
-                    <Typography sx={labelStyles}>Wishlist</Typography>
-                    <Typography sx={labelStyles}>Shop</Typography>
-                </Stack>
+      <Divider
+        sx={{
+          marginTop: '2rem',
+          borderColor: theme.palette.primary.light,
+          opacity: 0.3
+        }}
+      />
 
-                <Stack rowGap={'1rem'} padding={'1rem'}>
-                    <Typography  variant='h6'>Quick Links</Typography>
-                    <Typography sx={labelStyles}>Privacy Policy</Typography>
-                    <Typography sx={labelStyles}>Terms Of Use</Typography>
-                    <Typography sx={labelStyles}>FAQ</Typography>
-                    <Typography sx={labelStyles}>Contact</Typography>
-                </Stack>
-
-                <Stack rowGap={'1rem'} padding={'1rem'}>
-                    <Typography  variant='h6'>Download App</Typography>
-                    {/* <Typography sx={{...labelStyles,color:"graytext",fontWeight:500}}>Save $3 with App New User Only</Typography> */}
-                    <Stack flexDirection={'row'} columnGap={'.5rem'}>
-
-                        <Box width={'100px'} height={"100px"}>
-                            <img src={QRCodePng} height={'100%'} width={'100%'} style={{objectFit:'contain'}} alt="QR Code"/>
-                        </Box>
-
-                        <Stack justifyContent={'space-around'}>
-                            <Stack>
-                                <img style={{width:"100%",height:"100%",cursor:"pointer"}} src={googlePlayPng} alt="GooglePlay" />
-                            </Stack>
-                            <Stack>
-                                <img style={{width:"100%",height:'100%',cursor:"pointer"}} src={appStorePng} alt="AppStore" />
-                            </Stack>
-                        </Stack>
-                    </Stack>
-
-                    <Stack mt={.6} flexDirection={'row'} columnGap={'2rem'}>
-                        <MotionConfig whileHover={{scale:1.1}} whileTap={{scale:1}}>
-                            <motion.img style={{cursor:"pointer"}} src={facebookPng} alt="Facebook" />
-                            <motion.img style={{cursor:"pointer"}} src={twitterPng} alt="Twitter" />
-                            <motion.img style={{cursor:"pointer"}} src={instagramPng} alt="Instagram" />
-                            <motion.img style={{cursor:"pointer"}} src={linkedinPng} alt="Linkedin" />
-                        </MotionConfig>
-                    </Stack>
-                </Stack>
-
-            </Stack>
-
-            {/* lower */}
-            <Stack alignSelf={"center"}>
-                <Typography color={'GrayText'}>&copy; Mern Store {new Date().getFullYear()}. All right reserved</Typography>
-            </Stack>
-
-    </Stack>
-  )
-}
+      <Typography
+        align="center"
+        variant="caption"
+        sx={{ color: theme.palette.grey[400], marginTop: '1rem' }}
+      >
+        &copy; {new Date().getFullYear()} 49Stores. All rights reserved.
+      </Typography>
+    </Box>
+  );
+};

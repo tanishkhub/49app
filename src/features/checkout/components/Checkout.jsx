@@ -86,7 +86,7 @@ export const Checkout = () => {
             const data = await response.json();
 
             if (data.orderId) {
-                alert(process.env.REACT_APP_RAZORPAY_KEY_ID)
+                // alert(process.env.REACT_APP_RAZORPAY_KEY_ID)
                 const options = {
                    
                     

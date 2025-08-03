@@ -9,6 +9,9 @@ import { LoadingButton } from '@mui/lab';
 import {selectLoggedInUser,loginAsync,selectLoginStatus, selectLoginError, clearLoginError, resetLoginStatus} from '../AuthSlice'
 import { toast } from 'react-toastify'
 import {MotionConfig, motion} from 'framer-motion'
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { InputAdornment, IconButton } from '@mui/material';
 
 export const Login = () => {
   const dispatch=useDispatch()
@@ -56,7 +59,7 @@ export const Login = () => {
     delete cred.confirmPassword
     dispatch(loginAsync(cred))
   }
-
+const [showPassword, setShowPassword] = React.useState(false);
   return (
     <Stack width={'100vw'} height={'100vh'} flexDirection={'row'} sx={{overflowY:"hidden"}}>
         
@@ -87,10 +90,32 @@ export const Login = () => {
                     </motion.div>
 
                     
-                    <motion.div whileHover={{y:-5}}>
-                      <TextField type='password' fullWidth {...register("password",{required:"Password is required"})} placeholder='Password'/>
-                      {errors.password && <FormHelperText sx={{mt:1}} error>{errors.password.message}</FormHelperText>}
-                    </motion.div>
+                   <motion.div whileHover={{ y: -5 }}>
+  <TextField
+    type={showPassword ? 'text' : 'password'}
+    fullWidth
+    placeholder='Password'
+    {...register("password", { required: "Password is required" })}
+    InputProps={{
+      endAdornment: (
+        <InputAdornment position="end">
+          <IconButton
+            aria-label="toggle password visibility"
+            onClick={() => setShowPassword((prev) => !prev)}
+            edge="end"
+          >
+            {showPassword ? <VisibilityOff /> : <Visibility />}
+          </IconButton>
+        </InputAdornment>
+      ),
+    }}
+  />
+  {errors.password && (
+    <FormHelperText sx={{ mt: 1 }} error>
+      {errors.password.message}
+    </FormHelperText>
+  )}
+</motion.div>
                     
                     <motion.div whileHover={{scale:1.020}} whileTap={{scale:1}}>
                       <LoadingButton fullWidth  sx={{height:'2.5rem'}} loading={status==='pending'} type='submit' variant='contained'>Login</LoadingButton>

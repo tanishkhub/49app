@@ -1,4 +1,4 @@
-import { Paper, Stack, Typography, useTheme, Tooltip } from '@mui/material';
+import { Paper, Stack, Typography, useTheme, Tooltip, Box } from '@mui/material';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
@@ -84,45 +84,63 @@ export const ProductCard = ({
         </Stack>
 
         {/* Image Section */}
-        <Stack
-          sx={{
-            flex: 1,
-            position: 'relative',
-            backgroundColor: '#fafafa',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <motion.img
-            src={thumbnail}
-            alt={title}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              objectFit: 'contain',
-              borderRadius: '12px',
-            }}
-          />
-          {/* Subtle Overlay Effect on Hover */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileHover={{ opacity: 0.15 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: '#000',
-              borderRadius: '12px',
-            }}
-          />
-        </Stack>
+<Stack
+  sx={{
+    flex: 1,
+    backgroundColor: '#fafafa',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    px: 2,
+    py: 2,
+  }}
+>
+  <Box
+    component={motion.div}
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ duration: 0.5 }}
+    sx={{
+      width: '100%',
+      height: '100%',
+      maxHeight: 220,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+      borderRadius: 2,
+    }}
+  >
+    <Box
+      component="img"
+  src={thumbnail}
+  alt={title}
+  loading="lazy"
+  width="100%"
+  height="auto"
+  style={{ objectFit: "contain" }}
+  onError={(e) => { e.target.src = logo; }} // Optional fallback
+    />
+  </Box>
+
+  {/* Overlay for hover effect */}
+  <motion.div
+    initial={{ opacity: 0 }}
+    whileHover={{ opacity: 0.15 }}
+    transition={{ duration: 0.3 }}
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: '#000',
+      borderRadius: '12px',
+    }}
+  />
+</Stack>
+
 
         {/* Info & Action Section */}
         <Stack

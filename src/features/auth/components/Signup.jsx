@@ -9,6 +9,9 @@ import { LoadingButton } from '@mui/lab';
 import {selectLoggedInUser, signupAsync,selectSignupStatus, selectSignupError, clearSignupError, resetSignupStatus} from '../AuthSlice'
 import { toast } from 'react-toastify'
 import { MotionConfig , motion} from 'framer-motion'
+import { IconButton, InputAdornment } from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export const Signup = () => {
   const dispatch=useDispatch()
@@ -20,6 +23,8 @@ export const Signup = () => {
   const theme=useTheme()
   const is900=useMediaQuery(theme.breakpoints.down(900))
   const is480=useMediaQuery(theme.breakpoints.down(480))
+const [showPassword, setShowPassword] = React.useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
   // handles user redirection
   useEffect(()=>{
@@ -95,14 +100,63 @@ export const Signup = () => {
                       </motion.div>
 
                       <motion.div>
-                        <TextField type='password' fullWidth {...register("password",{required:"Password is required",pattern:{value:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm,message:`at least 8 characters, must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number, Can contain special characters`}})} placeholder='Password'/>
-                        {errors.password && <FormHelperText error>{errors.password.message}</FormHelperText>}
-                      </motion.div>
+  <TextField
+    type={showPassword ? 'text' : 'password'}
+    fullWidth
+    {...register("password", {
+      required: "Password is required",
+      pattern: {
+        value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm,
+        message:
+          "at least 8 characters, must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number. Can contain special characters",
+      },
+    })}
+    placeholder='Password'
+    InputProps={{
+      endAdornment: (
+        <InputAdornment position="end">
+          <IconButton
+            onClick={() => setShowPassword((prev) => !prev)}
+            edge="end"
+            aria-label="toggle password visibility"
+          >
+            {showPassword ? <VisibilityOff /> : <Visibility />}
+          </IconButton>
+        </InputAdornment>
+      ),
+    }}
+  />
+  {errors.password && <FormHelperText error>{errors.password.message}</FormHelperText>}
+</motion.div>
+
                       
                       <motion.div>
-                        <TextField type='password' fullWidth {...register("confirmPassword",{required:"Confirm Password is required",validate:(value,fromValues)=>value===fromValues.password || "Passwords doesn't match"})} placeholder='Confirm Password'/>
-                        {errors.confirmPassword && <FormHelperText error>{errors.confirmPassword.message}</FormHelperText>}
-                      </motion.div>
+  <TextField
+    type={showConfirmPassword ? 'text' : 'password'}
+    fullWidth
+    {...register("confirmPassword", {
+      required: "Confirm Password is required",
+      validate: (value, fromValues) =>
+        value === fromValues.password || "Passwords don't match",
+    })}
+    placeholder='Confirm Password'
+    InputProps={{
+      endAdornment: (
+        <InputAdornment position="end">
+          <IconButton
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
+            edge="end"
+            aria-label="toggle confirm password visibility"
+          >
+            {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+          </IconButton>
+        </InputAdornment>
+      ),
+    }}
+  />
+  {errors.confirmPassword && <FormHelperText error>{errors.confirmPassword.message}</FormHelperText>}
+</motion.div>
+
                     
                     </MotionConfig>
 

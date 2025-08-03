@@ -161,19 +161,28 @@ export const ProductDetails = () => {
     }
 
     const [activeStep, setActiveStep] = React.useState(0);
-    const maxSteps = product?.images.length;
+    const maxSteps = product?.images?.filter(img => !!img)?.length || 0;
+
+
 
     const handleNext = () => {
+    if (activeStep < maxSteps - 1) {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    };
+    }
+};
 
-    const handleBack = () => {
+  const handleBack = () => {
+    if (activeStep > 0) {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
+    }
+};
 
-    const handleStepChange = (step) => {
+   const handleStepChange = (step) => {
+    if (step < maxSteps) {
         setActiveStep(step);
-    };
+    }
+};
+
 
 
     return (
@@ -211,18 +220,30 @@ export const ProductDetails = () => {
                                                     <Stack width={is480 ? "100%" : is990 ? '400px' : "500px"} >
                                                         <AutoPlaySwipeableViews width={'100%'} height={'100%'} axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={activeStep} onChangeIndex={handleStepChange} enableMouseEvents >
                                                             {
-                                                                product?.images.map((image, index) => (
-                                                                    <div key={index} style={{ width: "100%", height: '100%' }}>
-                                                                        {
-                                                                            Math.abs(activeStep - index) <= 2
-                                                                                ?
-                                                                                <Box component="img" sx={{ width: '100%', objectFit: "contain", overflow: "hidden", aspectRatio: 1 / 1, borderRadius: '12px' }} src={image} alt={product?.title} />
-                                                                                :
-                                                                                null
-                                                                        }
-                                                                    </div>
-                                                                ))
-                                                            }
+  product?.images
+    .filter(img => !!img) // Only keep non-empty image URLs
+    .map((image, index) => (
+      <div key={index} style={{ width: "100%", height: '100%' }}>
+        {
+          Math.abs(activeStep - index) <= 2 && (
+            <Box
+              component="img"
+              sx={{
+                width: '100%',
+                objectFit: "contain",
+                overflow: "hidden",
+                aspectRatio: 1 / 1,
+                borderRadius: '12px'
+              }}
+              src={image}
+              alt={product?.title || "Product image"}
+            />
+          )
+        }
+      </div>
+    ))
+}
+
                                                         </AutoPlaySwipeableViews>
 
                                                         <MobileStepper steps={maxSteps} position="static" activeStep={activeStep} nextButton={<Button size="small" onClick={handleNext} disabled={activeStep === maxSteps - 1} sx={{ color: 'black', fontWeight: 600, transition: "0.2s" }} >Next {theme.direction === 'rtl' ? (<KeyboardArrowLeft />) : (<KeyboardArrowRight />)}</Button>} backButton={<Button size="small" onClick={handleBack} disabled={activeStep === 0} sx={{ color: 'black', fontWeight: 600, transition: "0.2s" }}>{theme.direction === 'rtl' ? (<KeyboardArrowRight />) : (<KeyboardArrowLeft />)} Back</Button>} />
