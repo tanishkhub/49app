@@ -85,6 +85,7 @@ export const Footer = () => {
           <Link to="/profile" style={linkStyle}><Typography sx={labelStyles}>My Account</Typography></Link>
           <Link to="/login" style={linkStyle}><Typography sx={labelStyles}>Login / Register</Typography></Link>
           <Link to="/cart" style={linkStyle}><Typography sx={labelStyles}>Cart</Typography></Link>
+          <Link to="https://merchant.razorpay.com/policy/PmOj9NwR8Ux31u/terms" style={linkStyle}><Typography sx={labelStyles}>Terms</Typography></Link>
           <Link to="/wishlist" style={linkStyle}><Typography sx={labelStyles}>Wishlist</Typography></Link>
           <Link to="/" style={linkStyle}><Typography sx={labelStyles}>Shop</Typography></Link>
         {/* WhatsApp Career Link */}
