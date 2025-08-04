@@ -24,6 +24,7 @@ import { ProductBanner } from './ProductBanner';
 import ClearIcon from '@mui/icons-material/Clear';
 import Lottie from 'lottie-react';
 
+
 const sortOptions = [
     { name: "Price: low to high", sort: "price", order: "asc" },
     { name: "Price: high to low", sort: "price", order: "desc" },
@@ -31,21 +32,21 @@ const sortOptions = [
 
 
 const bannerImages = [banner1, banner3, banner2, banner4];
-
 export const ProductList = () => {
+
     const [filters, setFilters] = useState({});
     const [page, setPage] = useState(1);
     const [sort, setSort] = useState(null);
     const theme = useTheme();
-
+    
     const is1200 = useMediaQuery(theme.breakpoints.down(1200));
     const is800 = useMediaQuery(theme.breakpoints.down(800));
     const is700 = useMediaQuery(theme.breakpoints.down(700));
     const is600 = useMediaQuery(theme.breakpoints.down(600));
     const is500 = useMediaQuery(theme.breakpoints.down(500));
     const is488 = useMediaQuery(theme.breakpoints.down(488));
-
-
+    
+    
     const [joke, setJoke] = useState(null);
     const [refreshCount, setRefreshCount] = useState(0);
 
@@ -96,24 +97,38 @@ export const ProductList = () => {
     }, []);
 
     useEffect(() => {
-        setPage(1);
-    }, [totalResults]);
+    setPage(1);
+}, [filters, sort]);
+
+const [isPageChanging, setIsPageChanging] = useState(false); 
+useEffect(() => {
+    setIsPageChanging(true);
+    const finalFilters = { ...filters };
+    finalFilters['pagination'] = { page, limit: ITEMS_PER_PAGE };
+    finalFilters['sort'] = sort;
+    if (!loggedInUser?.isAdmin) finalFilters['user'] = true;
+
+    dispatch(fetchProductsAsync(finalFilters)).finally(() => {
+        setIsPageChanging(false);
+    });
+}, [filters, page, sort]);
 
 
 
 
-    useEffect(() => {
-        const finalFilters = { ...filters };
-        finalFilters['pagination'] = { page: page, limit: ITEMS_PER_PAGE };
-        finalFilters['sort'] = sort;
+useEffect(() => {
+    const finalFilters = { ...filters };
+    finalFilters['pagination'] = { page: page, limit: ITEMS_PER_PAGE };
+    finalFilters['sort'] = sort;
 
-        if (!loggedInUser?.isAdmin) {
-            finalFilters['user'] = true;
-        }
+    if (!loggedInUser?.isAdmin) {
+        finalFilters['user'] = true;
+    }
 
-        dispatch(fetchProductsAsync(finalFilters));
-    }, [filters, page, sort]);
+    dispatch(fetchProductsAsync(finalFilters)); // this is correct!
+}, [filters, page, sort]);
 
+    
     const handleAddRemoveFromWishlist = (e, productId) => {
         if (e.target.checked) {
             const data = { user: loggedInUser?._id, product: productId };
@@ -588,13 +603,14 @@ export const ProductList = () => {
                             {/* pagination */}
                             <Stack alignSelf={is488 ? 'center' : 'flex-end'} mr={is488 ? 0 : 5} rowGap={2} p={is488 ? 1 : 0}>
                                 <Pagination
-                                    size={is488 ? 'medium' : 'large'}
-                                    page={page}
-                                    onChange={(e, page) => setPage(page)}
-                                    count={Math.ceil(totalResults / ITEMS_PER_PAGE)}
-                                    variant="outlined"
-                                    shape="rounded"
-                                />
+  size={is488 ? 'medium' : 'large'}
+  page={page}
+  onChange={(e, value) => setPage(value)}
+  count={Math.ceil(totalResults / ITEMS_PER_PAGE)} // 👍 Based on server response
+  variant="outlined"
+  shape="rounded"
+/>
+
                                 <Typography textAlign={'center'}>
                                     Showing {(page - 1) * ITEMS_PER_PAGE + 1} to {page * ITEMS_PER_PAGE > totalResults ? totalResults : page * ITEMS_PER_PAGE} of {totalResults} results
                                 </Typography>
