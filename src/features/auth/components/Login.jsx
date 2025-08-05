@@ -76,8 +76,8 @@ const [showPassword, setShowPassword] = React.useState(false);
               <Stack flexDirection={'row'} justifyContent={'center'} alignItems={'center'}>
 
                 <Stack rowGap={'.4rem'}>
-                  <Typography variant='h2' sx={{wordBreak:"break-word"}} fontWeight={600}>Mern Shop</Typography>
-                  <Typography alignSelf={'flex-end'} color={'GrayText'} variant='body2'>- Shop Anything</Typography>
+                  <Typography variant='h2' sx={{wordBreak:"break-word"}} fontWeight={600}>49 Stores</Typography>
+                  <Typography alignSelf={'flex-end'} color={'GrayText'} variant='body2'>- Shop Anything for just ₹49</Typography>
                 </Stack>
 
               </Stack>
