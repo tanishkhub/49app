@@ -20,7 +20,7 @@ export const Cart = ({ checkout }) => {
     const dispatch = useDispatch()
 
     const total = subtotal + SHIPPING + TAXES
-    const isCartValueValid = total >= 499
+    const isCartValueValid = total >= 200
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" })
@@ -166,7 +166,7 @@ export const Cart = ({ checkout }) => {
 
                             {!isCartValueValid && 
                                <Typography variant="body2" color="error" textAlign="center" fontWeight={500}>
-                               Minimum cart value for checkout is <span style={{ fontWeight: 'bold' }}>₹499</span>.
+                               Minimum cart value for checkout is <span style={{ fontWeight: 'bold' }}>₹200</span>.
                              </Typography>
                              
                             }

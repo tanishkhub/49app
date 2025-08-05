@@ -201,26 +201,36 @@ export const ProductCard = ({
               ) : (
                 !isAdminCard && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleAddToCart(e)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 0',
-                      borderRadius: '30px',
-                      border: 'none',
-                      outline: 'none',
-                      background: 'linear-gradient(90deg, #e91e63, #ff4081)',
-                      color: '#fff',
-                      fontWeight: '700',
-                      fontSize: '1rem',
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-                      transition: 'all 0.3s ease',
-                    }}
-                  >
-                    Add to Cart
-                  </motion.button>
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={(e) => {
+    e.stopPropagation();
+    if (!loggedInUser) {
+      navigate('/login');
+      return;
+    }
+    handleAddToCart(e);
+  }}
+  style={{
+    width: '100%',
+    padding: '10px 0',
+    borderRadius: '30px',
+    border: 'none',
+    outline: 'none',
+    background: !loggedInUser
+      ? 'linear-gradient(90deg, #757575, #9e9e9e)'
+      : 'linear-gradient(90deg, #e91e63, #ff4081)',
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+    transition: 'all 0.3s ease',
+  }}
+>
+  {loggedInUser ? 'Add to Cart' : 'Login to add to cart'}
+</motion.button>
+
                 )
               )
             )}

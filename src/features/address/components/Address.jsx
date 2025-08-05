@@ -1,9 +1,13 @@
 import { LoadingButton } from '@mui/lab'
 import { Button, Paper, Stack, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
-import React, { useState } from 'react'
+
+import React, { useState, useEffect } from 'react';
+
 import { useForm } from "react-hook-form"
 import { useDispatch, useSelector } from 'react-redux'
 import { deleteAddressByIdAsync, selectAddressErrors, selectAddressStatus, updateAddressByIdAsync } from '../AddressSlice'
+import axios from 'axios';
+import { MenuItem, Select, InputLabel, FormControl, Grid } from '@mui/material';
 
 export const Address = ({id,type,street,postalCode,country,phoneNumber,state,city}) => {
 
@@ -15,6 +19,52 @@ export const Address = ({id,type,street,postalCode,country,phoneNumber,state,cit
     const status=useSelector(selectAddressStatus)
     const error=useSelector(selectAddressErrors)
     
+
+    const [locations, setLocations] = useState([]);
+const [states, setStates] = useState([]);
+const [cities, setCities] = useState([]);
+const [postalCodes, setPostalCodes] = useState([]);
+
+const [selectedState, setSelectedState] = useState(state || '');
+const [selectedCity, setSelectedCity] = useState(city || '');
+const [postalCodeValue, setPostalCodeValue] = useState(postalCode || '');
+
+useEffect(() => {
+  axios.get(`${process.env.REACT_APP_BASE_URL}/api/locations`)
+    .then((res) => {
+      const rawData = res.data;
+      const transformed = [];
+
+      Object.entries(rawData).forEach(([state, cities]) => {
+        Object.entries(cities).forEach(([city, postalCodes]) => {
+          transformed.push({
+            state,
+            city,
+            postalCodes: postalCodes.filter(p => p && p.trim() !== "")
+          });
+        });
+      });
+
+      setLocations(transformed);
+      setStates([...new Set(transformed.map(item => item.state))]);
+
+      if (state) {
+        const filteredCities = transformed.filter(loc => loc.state === state);
+        setCities(filteredCities);
+      }
+
+      if (city) {
+        const matched = transformed.find(loc => loc.state === state && loc.city === city);
+        if (matched) {
+          setPostalCodes(matched.postalCodes);
+        }
+      }
+
+    })
+    .catch((err) => console.error("Error loading locations:", err));
+}, []);
+
+
     const is480=useMediaQuery(theme.breakpoints.down(480))
 
     const handleRemoveAddress=()=>{
@@ -27,6 +77,30 @@ export const Address = ({id,type,street,postalCode,country,phoneNumber,state,cit
         dispatch(updateAddressByIdAsync(update))
     }
 
+const handleStateChange = (e) => {
+  const selected = e.target.value;
+  setSelectedState(selected);
+  setSelectedCity('');
+  setPostalCodeValue('');
+  const filtered = locations.filter(loc => loc.state === selected);
+  setCities(filtered);
+};
+
+const handleCityChange = (e) => {
+  const selected = e.target.value;
+  setSelectedCity(selected);
+  const matched = locations.find(loc => loc.state === selectedState && loc.city === selected);
+  if (matched) {
+    setPostalCodes(matched.postalCodes);
+  } else {
+    setPostalCodes([]);
+  }
+};
+
+const handlePostalCodeChange = (e) => {
+  const code = e.target.value;
+  setPostalCodeValue(code);
+};
 
   return (
     <Stack width={'100%'} p={is480?0:1}>
@@ -57,10 +131,6 @@ export const Address = ({id,type,street,postalCode,country,phoneNumber,state,cit
                             <TextField {...register("street",{required:true,value:street})}/>
                         </Stack>
 
-                        <Stack>
-                            <Typography gutterBottom>Postal Code</Typography>
-                            <TextField type='number' {...register("postalCode",{required:true,value:postalCode})}/>
-                        </Stack>
 
                         <Stack>
                             <Typography gutterBottom>Country</Typography>
@@ -72,15 +142,57 @@ export const Address = ({id,type,street,postalCode,country,phoneNumber,state,cit
                             <TextField type='number' {...register("phoneNumber",{required:true,value:phoneNumber})}/>
                         </Stack>
 
-                        <Stack>
-                            <Typography gutterBottom>State</Typography>
-                            <TextField {...register("state",{required:true,value:state})}/>
-                        </Stack>
+                       <Grid container spacing={2}>
+  <Grid item xs={12}>
+    <Typography gutterBottom>State</Typography>
+    <TextField
+      select
+      fullWidth
+      value={selectedState}
+      onChange={handleStateChange}
+      {...register("state", { required: true })}
+    >
+      {states.map((state, i) => (
+        <MenuItem key={i} value={state}>{state}</MenuItem>
+      ))}
+    </TextField>
+  </Grid>
 
-                        <Stack>
-                            <Typography gutterBottom>City</Typography>
-                            <TextField {...register("city",{required:true,value:city})}/>
-                        </Stack>
+  <Grid item xs={12}>
+    <Typography gutterBottom>City</Typography>
+    <TextField
+      select
+      fullWidth
+      value={selectedCity}
+      onChange={handleCityChange}
+      disabled={!selectedState}
+      {...register("city", { required: true })}
+    >
+      {cities.map((loc, i) => (
+        <MenuItem key={i} value={loc.city}>{loc.city}</MenuItem>
+      ))}
+    </TextField>
+  </Grid>
+
+  <Grid item xs={12}>
+    <Typography gutterBottom>Postal Code</Typography>
+    <FormControl fullWidth disabled={!selectedCity}>
+      <InputLabel>Postal Code</InputLabel>
+      <Select
+        value={postalCodeValue}
+        onChange={handlePostalCodeChange}
+      >
+        {postalCodes.map((code, index) => (
+          <MenuItem key={index} value={code}>
+            {code}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+    <input type="hidden" {...register("postalCode", { required: true })} value={postalCodeValue} />
+  </Grid>
+</Grid>
+
                     </Stack>
                 ):(
                 <>

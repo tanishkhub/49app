@@ -34,6 +34,7 @@ import {
 
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { LocationManager } from './pages/LocationManager';
 
 function App() {
   const isAuthChecked  = useSelector(selectIsAuthChecked);
@@ -65,6 +66,7 @@ function App() {
           <>
             <Route path='/admin/dashboard'        element={<Protected><AdminDashboardPage/></Protected>} />
             <Route path='/admin/add-product'      element={<Protected><AddProductPage/></Protected>} />
+            <Route path='/location'              element={<Protected><LocationManager/></Protected>}/>
             <Route path='/admin/product-update/:id'
                                                    element={<Protected><ProductUpdatePage/></Protected>} />
             <Route path='/admin/orders'           element={<Protected><AdminOrdersPage/></Protected>} />
@@ -82,6 +84,7 @@ function App() {
             <Route path='/wishlist'              element={<Protected><WishlistPage/></Protected>} />
             {/* fallback to public 404 */}
             <Route path='*'                      element={<NotFoundPage/>} />
+            
           </>
         )}
       </>

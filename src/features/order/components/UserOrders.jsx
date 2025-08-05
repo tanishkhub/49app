@@ -187,8 +187,23 @@ export const UserOrders = () => {
                                                     <Stack mt={2} flexDirection={'row'} rowGap={is768 ? '2rem' : ''} columnGap={4} flexWrap={is768 ? "wrap" : "nowrap"} key={product.product._id}>
 
                                                         <Stack>
-                                                            <img style={{ width: "100%", aspectRatio: is480 ? 3 / 2 : 1 / 1, objectFit: "contain", borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }} src={product.product.images[0]} alt="" />
-                                                        </Stack>
+                                                           <img
+  src={product.product.images[0]}
+  alt={product.product.title}
+  style={{
+    maxWidth: is480 ? '100%' : '10rem', // Set a consistent width for non-mobile
+    height: 'auto',
+    objectFit: 'contain',
+    aspectRatio: '1 / 1',
+    backgroundColor: '#fff',
+    padding: '0.5rem',
+    borderRadius: '12px',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
+    display: 'block',
+    margin: 'auto',
+  }}
+/>
+</Stack>
 
                                                         <Stack rowGap={1} width={'100%'}>
                                                             <Stack flexDirection={'row'} justifyContent={'space-between'}>

@@ -169,6 +169,20 @@ export const Navbar = ({ isProductList = false }) => {
                   </Typography>
                 </MenuItem>
               )}
+              {loggedInUser.isAdmin && (
+  <MenuItem onClick={handleCloseUserMenu}>
+    <Typography
+      component={Link}
+      color="text.primary"
+      sx={{ textDecoration: 'none', fontFamily: 'Poppins, sans-serif' }}
+      to="/location"
+      textAlign="center"
+    >
+      Delivery Locations
+    </Typography>
+  </MenuItem>
+)}
+
               {settings.map((setting) => (
                 <MenuItem key={setting.name} onClick={handleCloseUserMenu}>
                   <Typography

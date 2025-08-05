@@ -8,12 +8,27 @@ import { useForm } from 'react-hook-form'
 import { LoadingButton } from '@mui/lab'
 import { toast } from 'react-toastify'
 import profilepic from "../../../assets/images/profilepic.gif";
+import axios from 'axios';
+import { MenuItem, Select, InputLabel, FormControl, Grid } from '@mui/material';
 
 
 export const UserProfile = () => {
 
+
+  // TOP of UserProfile.jsx inside component
+const [locations, setLocations] = useState([]);
+const [states, setStates] = useState([]);
+const [cities, setCities] = useState([]);
+const [postalCodes, setPostalCodes] = useState([]);
+
+const [selectedState, setSelectedState] = useState('');
+const [selectedCity, setSelectedCity] = useState('');
+const [postalCode, setPostalCode] = useState('');
+
+
   const dispatch = useDispatch()
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm()
+  const { register, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm()
+
   const status = useSelector(selectAddressStatus)
   const userInfo = useSelector(selectUserInfo)
   const addresses = useSelector(selectAddresses)
@@ -26,6 +41,28 @@ export const UserProfile = () => {
 
   const is900 = useMediaQuery(theme.breakpoints.down(900))
   const is480 = useMediaQuery(theme.breakpoints.down(480))
+
+  useEffect(() => {
+  axios.get(`${process.env.REACT_APP_BASE_URL}/api/locations`)
+    .then((res) => {
+      const rawData = res.data;
+      const transformed = [];
+
+      Object.entries(rawData).forEach(([state, cities]) => {
+        Object.entries(cities).forEach(([city, postalCodes]) => {
+          transformed.push({
+            state,
+            city,
+            postalCodes: postalCodes.filter(p => p && p.trim() !== "")
+          });
+        });
+      });
+
+      setLocations(transformed);
+      setStates([...new Set(transformed.map(item => item.state))]);
+    })
+    .catch((err) => console.error("Error loading locations:", err));
+}, []);
 
   useEffect(() => {
     window.scrollTo({
@@ -73,6 +110,37 @@ export const UserProfile = () => {
     reset()
   }
 
+  const handleStateChange = (e) => {
+  const state = e.target.value;
+  setSelectedState(state);
+  setSelectedCity('');
+  setPostalCodes([]);
+  setPostalCode('');
+  const filteredCities = locations.filter(loc => loc.state === state);
+  setCities(filteredCities);
+};
+
+const handleCityChange = (e) => {
+  const city = e.target.value;
+  setSelectedCity(city);
+  setValue("city", city);
+
+  const matchedLocation = locations.find(loc => loc.state === selectedState && loc.city === city);
+
+  if (matchedLocation) {
+    const postalList = matchedLocation.postalCodes.filter(p => p !== "");
+    setPostalCodes(postalList);
+  } else {
+    setPostalCodes([]);
+  }
+};
+
+const handlePostalCodeChange = (e) => {
+  const code = e.target.value;
+  setPostalCode(code);
+  setValue('postalCode', code);
+};
+
   return (
     <Stack height={'calc(100vh - 4rem)'} justifyContent={'flex-start'} alignItems={'center'}>
 
@@ -105,11 +173,59 @@ export const UserProfile = () => {
               <Stack width={'100%'} component={'form'} noValidate onSubmit={handleSubmit(handleAddAddress)} rowGap={3} borderRadius="0.8rem" boxShadow={2} p={3}>
                 <TextField label="Address Type" variant="outlined" fullWidth {...register("type", { required: true })} error={!!errors.type} helperText={errors.type && 'Address type is required'} />
                 <TextField label="Street" variant="outlined" fullWidth {...register("street", { required: true })} error={!!errors.street} helperText={errors.street && 'Street is required'} />
-                <TextField label="Postal Code" type="number" variant="outlined" fullWidth {...register("postalCode", { required: true })} error={!!errors.postalCode} helperText={errors.postalCode && 'Postal code is required'} />
                 <TextField label="Country" variant="outlined" fullWidth {...register("country", { required: true })} error={!!errors.country} helperText={errors.country && 'Country is required'} />
                 <TextField label="Phone Number" type="number" variant="outlined" fullWidth {...register("phoneNumber", { required: true })} error={!!errors.phoneNumber} helperText={errors.phoneNumber && 'Phone number is required'} />
-                <TextField label="State" variant="outlined" fullWidth {...register("state", { required: true })} error={!!errors.state} helperText={errors.state && 'State is required'} />
-                <TextField label="City" variant="outlined" fullWidth {...register("city", { required: true })} error={!!errors.city} helperText={errors.city && 'City is required'} />
+                <Grid container spacing={2}>
+  <Grid item xs={6}>
+    <TextField
+      select
+      label="State"
+      variant="outlined"
+      fullWidth
+      value={selectedState}
+      onChange={handleStateChange}
+      required
+    >
+      {states.map((state, i) => (
+        <MenuItem key={i} value={state}>{state}</MenuItem>
+      ))}
+    </TextField>
+  </Grid>
+  <Grid item xs={6}>
+    <TextField
+      select
+      label="City"
+      variant="outlined"
+      fullWidth
+      value={selectedCity}
+      onChange={handleCityChange}
+      disabled={!selectedState}
+      required
+    >
+      {cities.map((loc, i) => (
+        <MenuItem key={i} value={loc.city}>{loc.city}</MenuItem>
+      ))}
+    </TextField>
+  </Grid>
+  <Grid item xs={6}>
+    <FormControl fullWidth disabled={!selectedCity}>
+      <InputLabel>Postal Code</InputLabel>
+      <Select
+        label="Postal Code"
+        value={postalCode}
+        onChange={handlePostalCodeChange}
+      >
+        {postalCodes.map((code, index) => (
+          <MenuItem key={index} value={code}>
+            {code}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+    {/* Hidden input for react-hook-form */}
+    <input type="hidden" {...register("postalCode", { required: true })} value={postalCode} />
+  </Grid>
+</Grid>
 
                 <Stack flexDirection={'row'} alignSelf={'flex-end'} columnGap={2}>
                   <LoadingButton loading={status === 'pending'} type='submit' variant='contained' color='primary'>Add Address</LoadingButton>

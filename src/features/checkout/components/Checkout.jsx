@@ -1,4 +1,4 @@
-import { Stack, TextField, Typography, Button, Grid, FormControl, Radio, Paper, IconButton, useTheme, useMediaQuery, Card } from '@mui/material';
+import { Stack, TextField, InputLabel, Select, MenuItem,Typography, Button, Grid, FormControl, Radio, Paper, IconButton, useTheme, useMediaQuery, Card } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import React, { useEffect, useState } from 'react';
 import { Cart } from '../../cart/components/Cart';
@@ -12,12 +12,14 @@ import { resetCartByUserIdAsync, selectCartItems } from '../../cart/CartSlice';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { SHIPPING, TAXES } from '../../../constants';
 import { motion } from 'framer-motion';
+// import { useEffect, useState } from "react";
+import axios from "axios";
 
 export const Checkout = () => {
     const addresses = useSelector(selectAddresses);
     const [selectedAddress, setSelectedAddress] = useState(addresses[0]);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
-    const { register, handleSubmit, reset } = useForm();
+    const { register, handleSubmit, reset, setValue } = useForm();
     const dispatch = useDispatch();
     const loggedInUser = useSelector(selectLoggedInUser);
     const addressStatus = useSelector(selectAddressStatus);
@@ -25,6 +27,43 @@ export const Checkout = () => {
     const cartItems = useSelector(selectCartItems);
     const orderStatus = useSelector(selectOrderStatus);
     const currentOrder = useSelector(selectCurrentOrder);
+
+// location data auto filling 
+
+const [locations, setLocations] = useState([]);
+const [states, setStates] = useState([]);
+const [cities, setCities] = useState([]);
+const [selectedState, setSelectedState] = useState('');
+const [selectedCity, setSelectedCity] = useState('');
+const [postalCode, setPostalCode] = useState('');
+const [postalCodes, setPostalCodes] = useState([]);
+
+useEffect(() => {
+  axios.get(`${process.env.REACT_APP_BASE_URL}/api/locations`)
+    .then((res) => {
+      const rawData = res.data;
+      const transformed = [];
+
+      Object.entries(rawData).forEach(([state, cities]) => {
+        Object.entries(cities).forEach(([city, postalCodes]) => {
+          transformed.push({
+            state,
+            city,
+            postalCodes: postalCodes.filter(p => p && p.trim() !== "")
+          });
+        });
+      });
+
+      setLocations(transformed);
+
+      const uniqueStates = [...new Set(transformed.map(item => item.state))];
+      setStates(uniqueStates);
+    })
+    .catch((err) => console.error("Error loading locations:", err));
+}, []);
+
+
+
 
     // Calculate order total and round up to nearest integer
     const orderTotal = Math.ceil(cartItems.reduce((acc, item) => (item.product.price * item.quantity) + acc, 0));
@@ -68,6 +107,7 @@ export const Checkout = () => {
         dispatch(createOrderAsync(order));
     };
 
+    
     const handleOnlinePayment = async () => {
         try {
             const response = await fetch(`${process.env.REACT_APP_BASE_URL}/orders/create-razorpay-order`, {
@@ -145,9 +185,9 @@ export const Checkout = () => {
     const handlePayment = () => {
         const totalAmount = Math.ceil(orderTotal + SHIPPING + TAXES);
 
-        // Check if the total amount exceeds 499
-        if (totalAmount < 499) {
-            setErrorMessage('Minimum order value should exceed ₹499.');
+        // Check if the total amount exceeds 200
+        if (totalAmount < 200) {
+            setErrorMessage('Minimum order value should exceed ₹200.');
             return; // Prevent further execution if validation fails
         }
 
@@ -159,6 +199,42 @@ export const Checkout = () => {
             handleOnlinePayment(); // Handle online payment
         }
     };
+
+
+const handleStateChange = (e) => {
+  const state = e.target.value;
+  setSelectedState(state);
+  setSelectedCity('');
+  setPostalCodes([]);
+  setPostalCode('');
+
+  const filteredCities = locations.filter(loc => loc.state === state);
+  setCities(filteredCities);
+  setValue('state', state);
+};
+
+
+const handleCityChange = (e) => {
+  const city = e.target.value;
+  setSelectedCity(city);
+  setValue("city", city);
+
+const matchedLocation = locations.find(loc => loc.state === selectedState && loc.city === city);
+
+if (matchedLocation) {
+  const postalList = matchedLocation.postalCodes.filter(p => p !== "");
+  setPostalCodes(postalList);
+} else {
+  setPostalCodes([]);
+}
+
+};
+
+const handlePostalCodeChange = (e) => {
+  const code = e.target.value;
+  setPostalCode(code);
+  setValue('postalCode', code);
+};
 
     return (
         <Stack
@@ -193,38 +269,92 @@ export const Checkout = () => {
 
                 {/* Address Form */}
                 <Card sx={{ padding: 3, borderRadius: '8px', boxShadow: 1 }}>
-                    <Stack component={'form'} noValidate rowGap={3} onSubmit={handleSubmit(handleAddAddress)}>
-                        <Typography variant="h6" color={theme.palette.text.primary}>Add New Address</Typography>
-                        <TextField label="Address Type" variant="outlined" fullWidth {...register("type", { required: true })} />
-                        <TextField label="Street" variant="outlined" fullWidth {...register("street", { required: true })} />
-                        <TextField label="Country" variant="outlined" fullWidth {...register("country", { required: true })} />
-                        <TextField label="Phone Number" type="number" variant="outlined" fullWidth {...register("phoneNumber", { required: true })} />
-                        <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                                <TextField label="City" variant="outlined" fullWidth {...register("city", { required: true })} />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <TextField label="State" variant="outlined" fullWidth {...register("state", { required: true })} />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <TextField label="Postal Code" type="number" variant="outlined" fullWidth {...register("postalCode", { required: true })} />
-                            </Grid>
-                        </Grid>
+  <Stack component={'form'} noValidate rowGap={3} onSubmit={handleSubmit(handleAddAddress)}>
+    <Typography variant="h6" color={theme.palette.text.primary}>Add New Address</Typography>
 
-                        <Stack flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'}>
-                            <LoadingButton
-                                loading={addressStatus === 'pending'}
-                                variant="contained"
-                                type="submit"
-                            >
-                                Add Address
-                            </LoadingButton>
-                            <Button variant="outlined" color="error" onClick={() => reset()}>
-                                Reset
-                            </Button>
-                        </Stack>
-                    </Stack>
-                </Card>
+    <TextField
+  select
+  label="Address Type"
+  variant="outlined"
+  fullWidth
+  {...register("type", { required: true })}
+>
+  <MenuItem value="Home">Home</MenuItem>
+  <MenuItem value="Work">Work</MenuItem>
+  <MenuItem value="Other">Other</MenuItem>
+</TextField>
+    <TextField label="Street" variant="outlined" fullWidth {...register("street", { required: true })} />
+    <TextField label="Country" variant="outlined" fullWidth {...register("country", { required: true })} />
+    <TextField label="Phone Number" type="number" variant="outlined" fullWidth {...register("phoneNumber", { required: true })} />
+
+    <Grid container spacing={2}>
+      <Grid item xs={6}>
+        <TextField
+          select
+          label="State"
+          variant="outlined"
+          fullWidth
+          value={selectedState}
+          onChange={handleStateChange}
+          required
+        >
+          {states.map((state, i) => (
+            <MenuItem key={i} value={state}>{state}</MenuItem>
+          ))}
+        </TextField>
+      </Grid>
+      <Grid item xs={6}>
+        <TextField
+          select
+          label="City"
+          variant="outlined"
+          fullWidth
+          value={selectedCity}
+          onChange={handleCityChange}
+          disabled={!selectedState}
+          required
+        >
+          {cities.map((loc, i) => (
+  <MenuItem key={i} value={loc.city}>{loc.city}</MenuItem>
+))}
+
+        </TextField>
+      </Grid>
+      <Grid item xs={6}>
+        <FormControl fullWidth disabled={!selectedCity}>
+  <InputLabel>Postal Code</InputLabel>
+  <Select
+    label="Postal Code"
+    value={postalCode}
+    onChange={handlePostalCodeChange}
+  >
+    {postalCodes.map((code, index) => (
+      <MenuItem key={index} value={code}>
+        {code}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+<input type="hidden" {...register("postalCode", { required: true })} value={postalCode} />
+
+
+      </Grid>
+    </Grid>
+
+    <Stack flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'}>
+      <LoadingButton
+        loading={addressStatus === 'pending'}
+        variant="contained"
+        type="submit"
+      >
+        Add Address
+      </LoadingButton>
+      <Button variant="outlined" color="error" onClick={() => reset()}>
+        Reset
+      </Button>
+    </Stack>
+  </Stack>
+</Card>
 
                 {/* Existing Addresses */}
                 <Stack>
@@ -288,7 +418,7 @@ export const Checkout = () => {
                     variant="contained"
                     onClick={handlePayment}
                     size="large"
-                    disabled={Math.ceil(orderTotal + SHIPPING + TAXES) < 499}
+                    disabled={Math.ceil(orderTotal + SHIPPING + TAXES) < 200}
                     sx={{
                         borderRadius: '8px',
                         boxShadow: 2,
@@ -301,9 +431,9 @@ export const Checkout = () => {
                 </LoadingButton>
 
                 {/* Minimum Order Error */}
-                {Math.ceil(orderTotal + SHIPPING + TAXES) < 499 && (
+                {Math.ceil(orderTotal + SHIPPING + TAXES) < 200 && (
                     <Typography color="error" variant="body2" mt={2} align="center">
-                        Minimum order value should exceed ₹499.
+                        Minimum order value should exceed ₹200.
                     </Typography>
                 )}
             </Stack>
