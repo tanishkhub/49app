@@ -110,15 +110,17 @@ const [postalCode, setPostalCode] = useState('');
     reset()
   }
 
-  const handleStateChange = (e) => {
+const handleStateChange = (e) => {
   const state = e.target.value;
   setSelectedState(state);
+  setValue("state", state); // 🔥 This is what was missing
   setSelectedCity('');
   setPostalCodes([]);
   setPostalCode('');
   const filteredCities = locations.filter(loc => loc.state === state);
   setCities(filteredCities);
 };
+
 
 const handleCityChange = (e) => {
   const city = e.target.value;

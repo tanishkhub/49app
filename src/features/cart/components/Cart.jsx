@@ -74,20 +74,22 @@ export const Cart = ({ checkout }) => {
                         }} 
                         rowGap={3}>
                         {
-                            items && items.map((item) => (
-                                <CartItem
-                                    key={item._id}
-                                    id={item._id}
-                                    title={item.product.title}
-                                    brand={item.product.brand.name}
-                                    category={item.product.category.name}
-                                    price={item.product.price}
-                                    quantity={item.quantity}
-                                    thumbnail={item.product.thumbnail}
-                                    stockQuantity={item.product.stockQuantity}
-                                    productId={item.product._id}
-                                />
-                            ))
+                           items?.filter(Boolean).map((item) => (
+  <CartItem
+    key={item?._id}
+    id={item?._id}
+    title={item?.product?.title || "Unnamed"}
+    brand={item?.product?.brand?.name || "No Brand"}
+    category={item?.product?.category?.name || "No Category"}
+    price={item?.product?.price || 0}
+    quantity={item?.quantity || 1}
+    thumbnail={item?.product?.thumbnail || ""}
+    stockQuantity={item?.product?.stockQuantity || 0}
+    productId={item?.product?._id}
+  />
+))
+
+                            
                         }
                     </Stack>
 
